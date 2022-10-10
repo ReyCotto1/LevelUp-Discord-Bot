@@ -17,12 +17,41 @@ TOKEN = os.getenv("TOKEN")
 prefix = '!'
 bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
 bot.remove_command('help')
+staticRoute = "./static/images/"
+# ---------------------------------------- Adicional ---------------------------------------- #
+
+# Funciones para cargar configuración inicial
+async def setUpVariables(init: str, log: str):
+    print(init)
+    global common, uncommon, rare, epic, legendary, mythic
+    common = "común"
+    uncommon = "poco común"
+    rare = "raro"
+    epic = "épico"
+    legendary = "legendario"
+    mythic = "mítico"
+    print(log)
+    
+    
+async def setUpImages(init: str, log: str):
+    print(init)
+    global commonFile, uncommonFile, rareFile, epicFile, legendaryFile, mythicFile
+    commonFile = discord.File(staticRoute + "comun.png", filename="comun.png")
+    uncommonFile = discord.File(staticRoute + "pococomun.png", filename="pococomun.png")
+    rareFile = discord.File(staticRoute + "raro.png", filename="raro.png")
+    epicFile = discord.File(staticRoute + "epico.png", filename="epico.png")
+    legendaryFile = discord.File(staticRoute + "legendario.png", filename="legendario.png")
+    mythicFile = discord.File(staticRoute + "mitico.png", filename="mitico.png")
+    print(log)
+
 
 # ---------------------------------------- Eventos ---------------------------------------- #
 
 # Evento que se llama una vez el bot está listo para ser usado.
 @bot.event
 async def on_ready():
+    await setUpVariables("Cargando variables globales . . .", "Variables cargadas.")
+    await setUpImages("Cargando imágenes . . .", "Imágenes cargadas.")
     print('¡LevelUp Bot está listo para su uso!')
 
 # Evento que se llama una vez un mensaje es creado y enviado.
@@ -34,7 +63,7 @@ async def on_message(message):
     else:
         author = message.author
         channel = message.channel
-        content = str(message.content.lower())
+        content = str(message.content.strip().lower())
 
         # Aquí se pone cualquier algoritmo o mensaje que el bot quiera enviar en reacción a un mensaje.
 
@@ -95,7 +124,48 @@ async def ayuda(message):
 # Comando !roll
 @bot.command()
 async def roll(message):
-    await message.channel.send(random.randint(0,6))
+    choice = random.randint(1, 100)
+    rarity = ""
+    path = ""
+    colour = discord.Colour.from_rgb(0, 0, 0)
+    if choice <= 50:
+        rarity = "común"
+        path = "comun.png" # 50 of 100 = 50
+        colour = discord.Colour.from_rgb(94, 94, 94)
+    elif choice <= 75: 
+        rarity = "poco común"
+        path = "pococomun.png" # 25 of 100 = 75
+        colour = discord.Colour.from_rgb(52, 124, 48)
+    elif choice <= 87: 
+        rarity = "raro"
+        path = "raro.png" # 12 of 100 = 85
+        colour = discord.Colour.from_rgb(56, 106, 132)
+    elif choice <= 95: 
+        rarity = "épico"
+        path = "epico.png" # 8 of 100 = 92
+        colour = discord.Colour.from_rgb(123, 69, 145)
+    elif choice <= 98:
+        rarity = "legendario"
+        path = "legendario.png" # 4 of 100 = 98
+        colour = discord.Colour.from_rgb(159, 122, 23)
+    elif choice <= 100:
+        rarity = "mítico"
+        path = "mitico.png" # 2 of 100 = 100
+        colour = discord.Colour.from_rgb(217, 81, 81)
+    print(rarity)
+    
+    file = discord.File(staticRoute + path, filename=path)
+    
+    name = f"¡Felicidades, has encontrado un objeto {rarity}!"
+    value = "Insertar descripción . . ."
+    embed = discord.Embed(colour=colour, title=name, description=value)
+    embed.set_image(url="attachment://" + path)
+    
+    name = "Título #1"
+    value = "Descripción . . ."
+    embed.add_field(name=name, value=value, inline=False)
+    
+    await message.channel.send(embed=embed, file=file)
 
 # Comando !limpiar
 @bot.command()
